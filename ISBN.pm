@@ -3,13 +3,15 @@ use strict;
 use subs qw(_common_format _checksum is_valid_checksum);
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $debug %country_data);
 
+use Exporter;
+
 my $debug = 0;
 
 @ISA       = qw(Exporter);
 @EXPORT    = qw();
 @EXPORT_OK = qw(is_valid_checksum ean_to_isbn isbn_to_ean);
 
-$VERSION   = '19980825';
+$VERSION   = '19990112';
 
 sub new
 	{
