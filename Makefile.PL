@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.3 2002/09/04 20:53:22 comdog Exp $
+# $Id: Makefile.PL,v 1.4 2002/09/06 04:39:21 comdog Exp $
 use ExtUtils::MakeMaker;
 
 my $tests = do {
