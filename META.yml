@@ -1,12 +1,12 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Business-ISBN
-version:      1.78
+version:      1.79
 version_from: ISBN.pm
 installdirs:  site
 requires:
-    Business::ISBN::Data:          1.08
+    Business::ISBN::Data:          1.09
     Test::More:                    0
 
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+generated_by: ExtUtils::MakeMaker version 6.23
