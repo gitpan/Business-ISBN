@@ -1,5 +1,5 @@
-# $Revision: 1.7 $
-# $Id: test.pl,v 1.7 2001/03/27 00:45:18 brian Exp $
+# $Revision: 1.8 $
+# $Id: test.pl,v 1.8 2001/03/27 16:38:12 brian Exp $
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
@@ -8,13 +8,15 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $^W = 1; $test = 1; $| = 1; print "1..17\n"; }
+BEGIN { $^W = 1; $test = 1; $| = 1; print "1..19\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Business::ISBN;
 $loaded = 1;
-print "ok ", $test++, "\n";
+&print_ok;
 
 my $VERBOSE = $ENV{ISBN_DEBUG};
+
+sub print_ok { print "ok ", $test++, "\n"; }
 
 ######################### End of black magic.
 
@@ -23,6 +25,7 @@ my $VERBOSE = $ENV{ISBN_DEBUG};
 # of the test code):
 
 my $GOOD_ISBN          = "1565922573";
+my $GOOD_ISBN_STRING   = "1-56592-257-3";
 my $GOOD_EAN           = "9781565922570";
 my $COUNTRY            = "1";
 my $PUBLISHER          = "56592";
@@ -40,14 +43,27 @@ my $isbn = Business::ISBN->new( $GOOD_ISBN );
 print "not " unless ref $isbn;
 print "not " unless ( ref $isbn 
 	and $isbn->is_valid eq Business::ISBN::GOOD_ISBN );
-print "ok ", $test++, "\n";
+print_ok;
 
 print "not " unless ( $isbn->publisher_code eq $PUBLISHER );
-print "ok ", $test++, "\n";
+print_ok;
 
 print "not " unless ( $isbn->country_code eq $COUNTRY );
-print "ok ", $test++, "\n";
+print_ok;
 }
+
+# can we make strings correctly?
+{
+my $isbn = Business::ISBN->new( $GOOD_ISBN );
+
+my $string = $isbn->as_string;
+print "not " unless $string eq $GOOD_ISBN_STRING;
+print_ok;
+
+$string = $isbn->as_string([]);
+print "not " unless $string eq $GOOD_ISBN;
+print_ok;
+} 
 
 # and bad checksums?
 {
@@ -58,13 +74,13 @@ print STDERR "valid is ", $isbn->is_valid, "\n" if $VERBOSE;
 print "not " unless ref $isbn;
 print "not " if ( ref $isbn and 
 	$isbn->is_valid != Business::ISBN::BAD_CHECKSUM );
-print "ok ", $test++, "\n";
+print_ok;
 
 #after this we should have a good ISBN
 $isbn->fix_checksum;
 
 print "not " unless $isbn->is_valid eq Business::ISBN::GOOD_ISBN;
-print "ok ", $test++, "\n";
+print_ok;
 }
 
 # bad country code?
@@ -74,11 +90,11 @@ my $isbn = Business::ISBN->new( $BAD_COUNTRY_ISBN );
 print "not " unless ref $isbn;
 print "not " if ( ref $isbn and
 	$isbn->is_valid != Business::ISBN::INVALID_COUNTRY_CODE );
-print "ok ", $test++, "\n";
+print_ok;
 print STDERR "is_valid is ", $isbn->is_valid, "\n" if $VERBOSE;
 print STDERR "country is ", $isbn->country_code, "\n" if $VERBOSE;
 print "not " if defined $isbn->country_code;
-print "ok ", $test++, "\n";
+print_ok;
 }
 
 # bad publisher code?
@@ -88,12 +104,12 @@ my $isbn = Business::ISBN->new( $BAD_PUBLISHER_ISBN );
 print "not " unless ref $isbn;
 print "not " if ( ref $isbn and
 	$isbn->is_valid != Business::ISBN::INVALID_PUBLISHER_CODE );
-print "ok ", $test++, "\n";
+print_ok;
 print STDERR "is valid is ", $isbn->is_valid, "\n" if $VERBOSE;
 print STDERR "publisher is ", $isbn->publisher_code, "\n" if $VERBOSE;
 
 print "not " if defined $isbn->publisher_code;
-print "ok ", $test++, "\n";
+print_ok;
 }
 
 # convert to EAN?
@@ -101,7 +117,7 @@ print "ok ", $test++, "\n";
 my $isbn = Business::ISBN->new( $GOOD_ISBN );
 
 print "not " unless $isbn->as_ean eq $GOOD_EAN;
-print "ok ", $test++, "\n";
+print_ok;
 }
 
 # do exportable functions do the right thing?
@@ -112,34 +128,34 @@ chop $SHORT_ISBN;
 my $valid = Business::ISBN::is_valid_checksum( $SHORT_ISBN );
 
 print "not " unless $valid eq Business::ISBN::BAD_ISBN;
-print "ok ", $test++, "\n";
+print_ok;
 
 $valid = Business::ISBN::is_valid_checksum( $GOOD_ISBN );
 
 print "not " unless $valid eq Business::ISBN::GOOD_ISBN;
-print "ok ", $test++, "\n";
+print_ok;
 
 $valid = Business::ISBN::is_valid_checksum( $BAD_CHECKSUM_ISBN );
 
 print "not " unless $valid eq Business::ISBN::BAD_CHECKSUM;
-print "ok ", $test++, "\n";
+print_ok;
 
 # the following three tests check is_valid_checksum's behaviour
 # with bad data.
 $valid = Business::ISBN::is_valid_checksum( $NULL_ISBN );
 
 print "not " unless $valid eq Business::ISBN::BAD_ISBN;
-print "ok ", $test++, "\n";
+print_ok;
 
 $valid = Business::ISBN::is_valid_checksum( $NO_GOOD_CHAR_ISBN );
 
 print "not " unless $valid eq Business::ISBN::BAD_ISBN;
-print "ok ", $test++, "\n";
+print_ok;
 
 $valid = Business::ISBN::is_valid_checksum( $SHORT_ISBN );
  
 print "not " unless $valid eq Business::ISBN::BAD_ISBN;
-print "ok ", $test++, "\n";
+print_ok;
 
 }
 

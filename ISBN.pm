@@ -1,6 +1,6 @@
 package Business::ISBN;
-# $Revision: 1.58 $
-# $Id: ISBN.pm,v 1.58 2001/03/27 00:46:48 brian Exp $
+# $Revision: 1.60 $
+# $Id: ISBN.pm,v 1.60 2001/04/01 21:09:04 brian Exp $
 
 use strict;
 use subs qw( _common_format _checksum is_valid_checksum
@@ -22,7 +22,7 @@ my $debug = 0;
 	INVALID_COUNTRY_CODE INVALID_PUBLISHER_CODE
 	BAD_CHECKSUM GOOD_ISBN BAD_ISBN);
 
-($VERSION)   = q$Revision: 1.58 $ =~ m/(\d+\.\d+)\s*$/;
+($VERSION)   = q$Revision: 1.60 $ =~ m/(\d+\.\d+)\s*$/;
 
 sub INVALID_COUNTRY_CODE   { -2 };
 sub INVALID_PUBLISHER_CODE { -3 };
@@ -35,7 +35,7 @@ sub new
 	my $class       = shift;
 	my $common_data = _common_format shift;
 	
-	return unless $common_data;
+	return unless defined $common_data;
 
 	my $self  = {};
 	bless $self, $class;
@@ -189,7 +189,7 @@ sub as_string
 	#constructor
 	$array_ref = $self->{'positions'} unless ref $array_ref eq 'ARRAY';
 	
-	return unless $self->is_valid;
+	return unless $self->is_valid eq GOOD_ISBN;
 	my $isbn = $self->isbn;
 	
 	foreach my $position ( sort { $b <=> $a } @$array_ref )
@@ -207,7 +207,7 @@ sub as_ean
 	
 	my $isbn = ref $self ? $self->as_string([]) : _common_format $self;
 	
-	return unless length $isbn == 10;
+	return unless ( defined $isbn and length $isbn == 10 );
 	
 	my $ean = '978' . substr($isbn, 0, 9);
 	
@@ -230,7 +230,7 @@ sub is_valid_checksum
 	{
 	my $data = _common_format shift;
 	
-	return BAD_ISBN unless ( $data and length $data == 10 );
+	return BAD_ISBN unless defined $data;
 	return GOOD_ISBN if substr($data, 9, 1) eq _checksum $data;
 	
 	return BAD_CHECKSUM;
@@ -259,7 +259,7 @@ sub isbn_to_ean
 	{
 	my $isbn = _common_format shift;
 	
-	return unless is_valid_checksum($isbn) eq GOOD_ISBN;
+	return unless (defined $isbn and is_valid_checksum($isbn) eq GOOD_ISBN);
 	
 	return as_ean($isbn);
 	}	
@@ -291,7 +291,7 @@ sub _checksum
 	{
 	my $data = _common_format shift;
 	
-	return unless $data;
+	return unless defined $data;
 	
 	my @digits = split //, $data;
 	my $sum    = 0;		
@@ -475,10 +475,12 @@ Business::ISBN - work with International Standard Book Numbers
 
 	#EXPORTABLE FUNCTIONS
 	
-	use Business::ISBN qw( is_valid_checksum isbn_to_ean ean_to_isbn );
+	use Business::ISBN qw( is_valid_checksum 
+		isbn_to_ean ean_to_isbn );
 	
 	#verify the checksum
-	if( is_valid_checksum('0123456789') eq Business::ISBN::GOOD_ISBN ) 
+	if( is_valid_checksum('0123456789') 
+		eq Business::ISBN::GOOD_ISBN ) 
 		{ ... }
 	
 	#convert to EAN (European Article Number)
@@ -489,32 +491,33 @@ Business::ISBN - work with International Standard Book Numbers
 
 =head1 DESCRIPTION
 
-=head2 new($isbn)
+=head2 C<new($isbn)>
 
 The constructor accepts a scalar representing the ISBN.
 
 The string representing the ISBN may contain characters
-other than [0-9xX], although these will be removed in the
+other than C<[0-9xX]>, although these will be removed in the
 internal representation.  The resulting string must look
 like an ISBN - the first nine characters must be digits and
 the tenth character must be a digit, 'x', or 'X'.
 
 The constructor attempts to determine the country
 code and the publisher code.  If these data cannot
-be determined, the constructor sets C<$obj->is_valid>
-to something other than GOOD_ISBN.
+be determined, the constructor sets C<$obj-E<gt>is_valid>
+to something other than C<GOOD_ISBN>.
 An object is still returned and it is up to the program
-to check C<$obj->is_valid> for one of four values (which
+to check C<$obj-E<gt>is_valid> for one of five values (which
 may be exported on demand). The actual values of these
 symbolic versions are the same as those from previous
 versions of this module which used literal values.
 
 
-	C<Business::ISBN::INVALID_PUBLISHER_CODE>
-	C<Business::ISBN::INVALID_COUNTRY_CODE>
-	C<Business::ISBN::BAD_CHECKSUM>
-	C<Business::ISBN::GOOD_ISBN>
-	C<Business::ISBN::BAD_ISBN>
+	Business::ISBN::INVALID_PUBLISHER_CODE
+	Business::ISBN::INVALID_COUNTRY_CODE
+	Business::ISBN::BAD_CHECKSUM
+	Business::ISBN::GOOD_ISBN
+	Business::ISBN::BAD_ISBN
+
 
 The string passed as the ISBN need not be a valid ISBN as
 long as it superficially looks like one.  This allows one to
@@ -524,48 +527,54 @@ extremely useful.  One should check the validity of the ISBN
 with C<is_valid()> rather than relying on the return value
 of the constructor.  If all one wants to do is check the
 validity of an ISBN, one can skip the object-oriented 
-interface and use the c<is_valid_checksum()> function
+interface and use the C<is_valid_checksum()> function
 which is exportable on demand.
 
-If the constructor decides it can't create an object, it
+If the constructor decides it cannot create an object, it
 returns C<undef>.  It may do this if the string passed as the
-ISBN can't be munged to the internal format meaning that it
+ISBN cannot be munged to the internal format meaning that it
 does not even come close to looking like an ISBN.
 
-=head2 $obj->publisher_code
+=head2 C<$obj-E<gt>publisher_code>
 
 Returns the publisher code or C<undef> if no publisher
 code was found.
 
-=head2 $obj->country_code
+=head2 C<$obj-E<gt>country_code>
 
 Returns the country code or C<undef> if no country code
 was found.
 
-=head2 $obj->hyphen_positions
+=head2 C<$obj-E<gt>hyphen_positions>
 
 Returns the list of hyphen positions as determined from the 
 country and publisher codes.  the C<as_string> method provides
 a way to temporarily override these positions and to even
 forego them altogether.
 
-=head2 $obj->as_string(),  $obj->as_string([])
+=head2 C<$obj-E<gt>as_string()>,  C<$obj-E<gt>as_string([])>
 
 Return the ISBN as a string.  This function takes an
 optional anonymous array (or array reference) that specifies
-the placement of hyphens in the string.  An empty list
-produces a string with no hyphens.
+the placement of hyphens in the string.  An empty anonymous array
+produces a string with no hyphens. An empty argument list 
+automatically hyphenates the ISBN based on the discovered
+country and publisher codes.  An ISBN that is not valid may 
+produce strange results. 
 
 The positions specified in the passed anonymous array
 are only used for one method use and do not replace
-the values specified by the constructor.
-
+the values specified by the constructor. The method
+assumes that you know what you are doing and will attempt
+to use the least three positions specified.  If you pass
+an anonymous array of several positions, the list will
+be sorted and the lowest three positions will be used.
 Positions less than 1 and greater than 9 are silently
 ignored.
 
 A terminating 'x' is changed to 'X'.
 
-=head2  $obj->is_valid()
+=head2  C<$obj-E<gt>is_valid()>
 
 Returns C<Business::ISBN::GOOD_ISBN> if the checksum is valid and the 
 country and publisher codes are defined.
@@ -580,7 +589,11 @@ could not be determined (relies on a valid checksum).
 Returns C<Business::ISBN::INVALID_PUBLISHER_CODE> if a publisher code 
 could not be determined (relies on a valid checksum and country code). 
 
-=head2  $obj->fix_checksum()
+Returns C<Business::ISBN::BAD_ISBN> if the string has no hope of ever
+looking like a valid ISBN.  This might include strings such as C<"abc">,
+C<"123456">, and so on. 
+
+=head2  C<$obj-E<gt>fix_checksum()>
 
 Replace the tenth character with the checksum the
 corresponds to the previous nine digits.  This does not
@@ -590,7 +603,7 @@ at all.  It only produces a string that passes the checksum
 routine.  If the ISBN passed to the constructor was invalid,
 the error might have been in any of the other nine positions.
 
-=head2  $obj->as_ean()
+=head2  C<$obj-E<gt>as_ean()>
 
 Converts the ISBN to the equivalent EAN (European Article Number).
 No pricing extension is added.  Returns the EAN as a string.  This
@@ -602,7 +615,7 @@ its argument list to determine what to do.
 Some functions can be used without the object interface.  These
 do not use object technology behind the scenes.
 
-=head2 is_valid_checksum('1565921496')
+=head2 C<is_valid_checksum('1565921496')>
 
 Takes the ISBN string and runs it through the checksum
 comparison routine.  Returns C<Business::ISBN::GOOD_ISBN> 
@@ -611,7 +624,7 @@ string looks like an ISBN but has an invalid checksum, and
 C<Business::ISBN::BAD_ISBN> if the string does not look like
 an ISBN.
 
-=head2 isbn_to_ean('1565921496')
+=head2 C<isbn_to_ean('1565921496')>
 
 Takes the ISBN string and converts it to the equivalent
 EAN string.  This function checks for a valid ISBN and will return
@@ -619,7 +632,7 @@ undef for invalid ISBNs, otherwise it returns the EAN as a string.
 Uses as_ean internally, which checks its arguments to determine
 what to do.
 
-=head2 ean_to_isbn('9781565921498')
+=head2 C<ean_to_isbn('9781565921498')>
 
 Takes the EAN string and converts it to the equivalent
 ISBN string.  This function checks for a valid ISBN and will return
@@ -629,7 +642,7 @@ what to do.
 
 =head1 AUTHOR
 
-brian d foy <bdfoy@cpan.org>
+brian d foy E<lt>bdfoy@cpan.orgE<gt>
 
 Copyright 2001 brian d foy
 
@@ -638,6 +651,10 @@ Fisher <stevef@teleord.co.uk> of Whitaker (the UK ISBN folks
 and the major bibliographic data provider in the UK).
 "Whitaker - helping to link authors to readers worldwide"
 
-Thanks to Mark W. Eichin <eichin@thok.org> for suggestions and
+Thanks to Mark W. Eichin E<lt>eichin@thok.orgE<gt> for suggestions and
 discussions on EAN support.
+
+Thanks to Andy Lester E<lt>andy@petdance.orgE<gt> for lots of bug fixes
+and testing.
+
 =cut
