@@ -11,7 +11,7 @@ my $debug = 0;
 @EXPORT    = qw();
 @EXPORT_OK = qw(is_valid_checksum ean_to_isbn isbn_to_ean);
 
-$VERSION   = '20001010';
+$VERSION   = '1.5';
 
 sub new
 	{
@@ -53,7 +53,7 @@ sub new
 	PUBLISHER_CODE:
 	while( defined( $trial_publisher_code = substr($self->{'isbn'}, 
 	                                      $country_code_length,
-	                                      $count++) )  and
+	                                      $count) )  and
 	                                      $count < $max_publisher_code_length)
 		{
 		my $trial_publisher_code_length = length $trial_publisher_code;
@@ -64,8 +64,8 @@ sub new
 		PAIR: 
 		while( @pairs )
 			{
-			my $lower_bound = shift @pairs;
-			my $upper_bound = shift @pairs;
+			my $lower_bound  = shift @pairs;
+			my $upper_bound  = shift @pairs;
 			my $lower_length = length $lower_bound;
 			my $upper_length = length $upper_bound;
 			
@@ -94,7 +94,9 @@ sub new
 					$trial_publisher_code_length;
 			    last PUBLISHER_CODE;
 			    }
-			}  	
+			} 
+			
+		$count++; 	
 		
 		}
 
@@ -165,7 +167,7 @@ sub as_string
 	return undef unless $self->is_valid;
 	my $isbn = $self->isbn;
 	
-	foreach my $position ( sort {$b <=> $a} @$array_ref )
+	foreach my $position ( sort { $b <=> $a } @$array_ref )
 		{
 		next if $position > 9 or $position < 1;
 		substr($isbn, $position, 0) = '-';
@@ -180,6 +182,8 @@ sub as_ean
 	
 	my $isbn = ref $self ? $self->as_string([]) : _common_format $self;
 	
+	return unless length $isbn == 10;
+	
 	my $ean = '978' . substr($isbn, 0, 9);;
 	
 	my $sum = 0;
@@ -188,8 +192,11 @@ sub as_ean
 		$sum +=     substr($ean, $index, 1);
 		$sum += 3 * substr($ean, $index + 1, 1);
 		}
-			
-	$ean .= 10 - ( $sum % 10 );
+	
+	#take the next higher multiple of 10 and subtract the sum.
+	#if $sum is 37, the next highest multiple of ten is 40. the
+	#check digit would be 40 - 37 => 3.
+	$ean .= ( 10 * ( int( $sum / 10 ) + 1 ) - $sum ) % 10;
 	
 	return $ean;
 	}
