@@ -1,5 +1,11 @@
 Revision history for Perl extension Business::ISBN.
 
+20001010  Sat Sep  9 00:33:07 EDT 2000
+	- fixed some missing arguments to _is_valid.  
+	- updated contact information
+	- added some real tests to test.pl
+	- everyone should update their installations
+
 19990112  Mon Jan 11 18:03:07 EST 1999
 	- added "use Exporter" which was missing.  
 

@@ -11,7 +11,7 @@ my $debug = 0;
 @EXPORT    = qw();
 @EXPORT_OK = qw(is_valid_checksum ean_to_isbn isbn_to_ean);
 
-$VERSION   = '19990112';
+$VERSION   = '20001010';
 
 sub new
 	{
@@ -236,7 +236,7 @@ sub _check_validity
 	{
 	my $self = shift;
 	
-	if( is_valid_checksum and defined $self->{'country_code'}
+	if( is_valid_checksum $self->{'isbn'} and defined $self->{'country_code'}
 	    and defined $self->{'publisher_code'} )
 	    {
 	    $self->{'valid'} = 1;
@@ -245,7 +245,7 @@ sub _check_validity
 		{
 		$self->{'valid'} = -3 if not defined $self->{'publisher_code'};
 		$self->{'valid'} = -2 if not defined $self->{'country_code'};
-		$self->{'valid'} = -1 if not is_valid_checksum;
+		$self->{'valid'} = -1 if not is_valid_checksum $self->{'isbn'};
 		}
 	}
 
@@ -441,7 +441,7 @@ Business::ISBN - work with International Standard Book Numbers
 
 	#convert from EAN (European Article Number)
 	$isbn = ean_to_isbn('9781565921498');
-	
+
 =head1 DESCRIPTION
 
 =head2 new($isbn)
@@ -569,11 +569,9 @@ what to do.
 
 =head1 AUTHOR
 
-brian d foy <comdog@computerdog.com>
-please see <URL:http://computerdog.com/brian/style.html> for 
-guidelines on proper attribution.
+brian d foy <brian@smithrenaud.com>
 
-Copyright 1998, Smith Renaud, Inc. 
+Copyright 2000, Smith Renaud, Inc. 
 
 The coding of this module was supported by Smith Renaud, Inc. 
 <URL:http://www.smithrenaud.com>.  This module is released under 
