@@ -2,6 +2,15 @@ Revision history for Perl extension Business::ISBN.
 $Revision: 1.4 $
 $Id: Changes,v 1.4 2001/03/19 14:34:25 brian Exp $
 
+1.58	Mon Mar 26 19:47:03 EST 2001
+	- there was an error in test.pl that failed to
+	identify a bug. Andy Lester <andy@petdance.com>
+	found it though.  the constructor was always
+	setting $obj->is_valid to BAD_CHECKSUM.  that
+	is fixed.
+	- version 1.57 should not be used at all.  it
+	is severely broken due to that bug.
+
 1.57	Wed Mar 21 18:07:17 EST 2001
 	- fixed -w dirty line in is_valid_checksum
 	(identified by Andy Lester <andy@petdance.com>)

@@ -1,5 +1,5 @@
-# $Revision: 1.6 $
-# $Id: test.pl,v 1.6 2001/03/19 14:33:57 brian Exp $
+# $Revision: 1.7 $
+# $Id: test.pl,v 1.7 2001/03/27 00:45:18 brian Exp $
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
@@ -38,7 +38,8 @@ my $SHORT_ISBN         = "156592";
 my $isbn = Business::ISBN->new( $GOOD_ISBN );
 
 print "not " unless ref $isbn;
-print "not " unless ( ref $isbn and $isbn->is_valid );
+print "not " unless ( ref $isbn 
+	and $isbn->is_valid eq Business::ISBN::GOOD_ISBN );
 print "ok ", $test++, "\n";
 
 print "not " unless ( $isbn->publisher_code eq $PUBLISHER );
@@ -59,9 +60,10 @@ print "not " if ( ref $isbn and
 	$isbn->is_valid != Business::ISBN::BAD_CHECKSUM );
 print "ok ", $test++, "\n";
 
+#after this we should have a good ISBN
 $isbn->fix_checksum;
 
-print "not " unless $isbn->is_valid;
+print "not " unless $isbn->is_valid eq Business::ISBN::GOOD_ISBN;
 print "ok ", $test++, "\n";
 }
 
@@ -140,3 +142,4 @@ print "not " unless $valid eq Business::ISBN::BAD_ISBN;
 print "ok ", $test++, "\n";
 
 }
+

@@ -1,6 +1,6 @@
 package Business::ISBN;
-# $Revision: 1.57 $
-# $Id: ISBN.pm,v 1.57 2001/03/19 14:32:29 brian Exp $
+# $Revision: 1.58 $
+# $Id: ISBN.pm,v 1.58 2001/03/27 00:46:48 brian Exp $
 
 use strict;
 use subs qw( _common_format _checksum is_valid_checksum
@@ -22,7 +22,7 @@ my $debug = 0;
 	INVALID_COUNTRY_CODE INVALID_PUBLISHER_CODE
 	BAD_CHECKSUM GOOD_ISBN BAD_ISBN);
 
-($VERSION)   = q$Revision: 1.57 $ =~ m/(\d+\.\d+)\s*$/;
+($VERSION)   = q$Revision: 1.58 $ =~ m/(\d+\.\d+)\s*$/;
 
 sub INVALID_COUNTRY_CODE   { -2 };
 sub INVALID_PUBLISHER_CODE { -3 };
@@ -133,9 +133,6 @@ sub new
 	return $self unless $self->{publisher_code};
 
 	# we have a valid publisher code, so the rest is gravy
-	# we just need to check the checksum. let's assume that
-	# it's okay and check later.
-	$self->{'valid'} = GOOD_ISBN;
 
 	#get the book code, which is everything between the
 	#publisher code the and the checksum
@@ -151,22 +148,21 @@ sub new
 		$self->{'checksum'}     = $2;
 		}
 
-	$self->{'valid'} = BAD_CHECKSUM 
-		unless is_valid_checksum $self->{'isbn'} eq GOOD_ISBN; 
+	$self->{'valid'} = is_valid_checksum( $self->{'isbn'} ); 
 
 	return $self;
 	}	
 
 
 #it's your fault if you muck with the internals yourself
-
-sub isbn             { my $self = shift; return $self->{'isbn'} }
-sub is_valid         { my $self = shift; return $self->{'valid'} }
-sub country_code     { my $self = shift; return $self->{'country_code'} }
-sub publisher_code   { my $self = shift; return $self->{'publisher_code'} }
-sub article_code     { my $self = shift; return $self->{'article_code'} }
-sub checksum         { my $self = shift; return $self->{'checksum'} }
-sub hyphen_positions { my $self = shift; return @{$self->{'positions'}} }
+# none of these take arguments
+sub isbn ()             { my $self = shift; return $self->{'isbn'} }
+sub is_valid ()         { my $self = shift; return $self->{'valid'} }
+sub country_code ()     { my $self = shift; return $self->{'country_code'} }
+sub publisher_code ()   { my $self = shift; return $self->{'publisher_code'} }
+sub article_code ()     { my $self = shift; return $self->{'article_code'} }
+sub checksum ()         { my $self = shift; return $self->{'checksum'} }
+sub hyphen_positions () { my $self = shift; return @{$self->{'positions'}} }
 
 	
 sub fix_checksum
@@ -435,6 +431,9 @@ BEGIN {
 9986 => [ 'LITHUANIA', ['00',39,400,899,9000,9999]]
 );
 
+# i cheat a little bit here.  i know that that the max length is
+# 5, and that i know that those will start with 999xx. :)
+# however, if the data changes i should think about this again.
 $MAX_COUNTRY_CODE_LENGTH = length( 
 	( sort { $a <=> $b } keys %country_data )[-1]
 	);
@@ -638,9 +637,6 @@ Country code and publisher code graciously provided by Steve
 Fisher <stevef@teleord.co.uk> of Whitaker (the UK ISBN folks
 and the major bibliographic data provider in the UK).
 "Whitaker - helping to link authors to readers worldwide"
-
-Thanks to Julie Koo of Kaya Publishing <URL:http://www.kaya.com>
-for useful discussions.
 
 Thanks to Mark W. Eichin <eichin@thok.org> for suggestions and
 discussions on EAN support.
