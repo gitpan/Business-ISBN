@@ -11,6 +11,7 @@ WriteMakefile(
     'VERSION_FROM' 	=> 'ISBN.pm', 
     'PREREQ_PM'     => {
     	Test::More       => 0,
+    	Test::Pod        => 0,
     	File::Find::Rule => 0,
     	},
 	'PM'            => { 'ISBN.pm' => '$(INST_LIBDIR)/ISBN.pm',
