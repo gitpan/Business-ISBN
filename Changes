@@ -1,5 +1,11 @@
 Revision history for Perl extension Business::ISBN.
 
 19980329  Sun Mar 29 03:29:16 1998
-	- original version; created by h2xs 1.18
-	- gutsy enough to actually release it for testing and comments
+        - original version; created by h2xs 1.18
+        - gutsy enough to actually release it for testing and comments
+
+19980825  Sun Oct  4 04:39:07 EDT 1998
+        - added support for EAN (European Article Number) to and
+        from ISBN.  no need to upgrade unless you need this
+        functionality.
+

@@ -7,9 +7,9 @@ my $debug = 0;
 
 @ISA       = qw(Exporter);
 @EXPORT    = qw();
-@EXPORT_OK = qw(is_valid_checksum);
+@EXPORT_OK = qw(is_valid_checksum ean_to_isbn isbn_to_ean);
 
-$VERSION   = '19980329';
+$VERSION   = '19980825';
 
 sub new
 	{
@@ -96,6 +96,18 @@ sub new
 		
 		}
 
+	#get the book code, which is everything between the
+	#publisher code the and the checksum
+	$common_data =~ m/  
+					$self->{'country_code'} 
+					$self->{'publisher_code'}
+					(.+)
+					([\dxX])
+					$
+					/x;
+	$self->{'article_code'} = $1 if defined $1 and defined $2;
+	$self->{'checksum'}     = $2 if defined $1 and defined $2;
+
 	if( is_valid_checksum $self->{'isbn'} and 
 	    defined $self->{'country_code'}  and 
 	    defined $self->{'publisher_code'} )
@@ -117,21 +129,12 @@ sub new
 
 sub isbn             { my $self = shift; return $self->{'isbn'} }
 sub is_valid         { my $self = shift; return $self->{'valid'} }
-sub publisher_code   { my $self = shift; return $self->{'publisher_code'} }
 sub country_code     { my $self = shift; return $self->{'country_code'} }
-sub country          { my $self = shift; return $self->{'country'} }
+sub publisher_code   { my $self = shift; return $self->{'publisher_code'} }
+sub article_code     { my $self = shift; return $self->{'article_code'} }
+sub checksum         { my $self = shift; return $self->{'checksum'} }
 sub hyphen_positions { my $self = shift; return @{$self->{'positions'}} }
 
-# the only exportable function
-#
-sub is_valid_checksum
-	{
-	my $data = _common_format shift;
-	
-	return 1 if substr($data, 9, 1) eq _checksum $data;
-	
-	return 0;
-	}
 	
 sub fix_checksum
 	{
@@ -168,7 +171,65 @@ sub as_string
 			
 	return $isbn;
 	}
+	
+sub as_ean
+	{
+	my $self = shift;
+	
+	my $isbn = ref $self ? $self->as_string([]) : _common_format $self;
+	
+	my $ean = '978' . substr($isbn, 0, 9);;
+	
+	my $sum = 0;
+	foreach my $index ( 0, 2, 4, 6, 8, 10 )
+		{
+		$sum +=     substr($ean, $index, 1);
+		$sum += 3 * substr($ean, $index + 1, 1);
+		}
+			
+	$ean .= 10 - ( $sum % 10 );
+	
+	return $ean;
+	}
+	
+sub is_valid_checksum
+	{
+	my $data = _common_format shift;
+	
+	return 1 if substr($data, 9, 1) eq _checksum $data;
+	
+	return 0;
+	}
 
+sub ean_to_isbn
+	{
+	my $ean = shift;
+	
+	$ean =~ s/[^0-9]//g;
+	
+	return undef unless length $ean == 13;
+	return undef unless substr($ean, 0, 3) eq '978';
+		
+	my $isbn = new Business::ISBN( substr($ean, 3, 9) . '1' );
+	
+	$isbn->fix_checksum;
+	
+	return $isbn->as_string([]) if $isbn->is_valid;
+	
+	return undef;
+	}
+
+		
+sub isbn_to_ean
+	{
+	my $isbn = _common_format shift;
+	
+	return undef unless is_valid_checksum($isbn);
+	
+	return as_ean($isbn);
+	}	
+	
+#internal function.  you don't get to use this one.
 sub _check_validity
 	{
 	my $self = shift;
@@ -185,7 +246,7 @@ sub _check_validity
 		$self->{'valid'} = -1 if not is_valid_checksum;
 		}
 	}
-	
+
 #internal function.  you don't get to use this one.
 sub _checksum
 	{
@@ -355,9 +416,8 @@ Business::ISBN - work with International Standard Book Numbers
 	#this not does affect the default positions
 	print $isbn_object->as_string([]);
 	
-	#print the country code, country, or publisher code
+	#print the country code or publisher code
 	print $isbn->country_code;
-	print $isbn->country;
 	print $isbn->publisher_code;
 	
 	#check to see if the ISBN is valid
@@ -367,6 +427,19 @@ Business::ISBN - work with International Standard Book Numbers
 	#in the checksum!
 	$isbn_object->fix_checksum;
 
+	#EXPORTABLE FUNCTIONS
+	
+	use Business::ISBN qw( is_valid_checksum isbn_to_ean ean_to_isbn );
+	
+	#verify the checksum
+	if( is_valid_checksum('0123456789') ) { ... }
+	
+	#convert to EAN (European Article Number)
+	$ean = isbn_to_ean('1565921496');
+
+	#convert from EAN (European Article Number)
+	$isbn = ean_to_isbn('9781565921498');
+	
 =head1 DESCRIPTION
 
 =head2 new($isbn)
@@ -379,10 +452,10 @@ internal representation.  The resulting string must look
 like an ISBN - the first nine characters must be digits and
 the tenth character must be a digit, 'x', or 'X'.
 
-The constructor attempts to determine the country code
-and the publisher code based on data from .  If these
-data cannot be determined, the constructor returns an
-error number:
+The constructor attempts to determine the country
+code and the publisher code.  If these data cannot
+be determined, the constructor returns an error
+number:
 
 	-3 Could not determine publisher code
 	-2 Could not determine country code
@@ -394,7 +467,10 @@ use the C<fix_checksum()> method.  Despite the disclaimer in
 the discussion of that method, the author has found it
 extremely useful.  One should check the validity of the ISBN
 with C<is_valid()> rather than relying on the return value
-of the constructor.
+of the constructor.  If all one wants to do is check the
+validity of an ISBN, one can skip the object-oriented 
+interface and use the c<is_valid_checksum()> function
+which is exportable on demand.
 
 If the constructor decides it can't create an object, it
 returns undef.  It may do this if the string passed as the
@@ -407,10 +483,6 @@ Returns the publisher code.
 =head2 $obj->country_code
 
 Returns the country code.
-
-=head2 $obj->country
-
-Returns the country designation associated with the country code.
 
 =head2 $obj->hyphen_positions
 
@@ -440,8 +512,8 @@ A terminating 'x' is changed to 'X'.
 Returns 1 if the checksum is valid and the country and
 publisher codes are defined.
 
-Returns -1 if the ISBN does not pass the checksum test, and 1
-if it does.  The constructor accepts invalid ISBN's so that
+Returns -1 if the ISBN does not pass the checksum test.  
+The constructor accepts invalid ISBN's so that
 they might be fixed with C<fix_checksum>.  
 
 Returns -2 if a country code could not be determined (relies
@@ -460,16 +532,50 @@ at all.  It only produces a string that passes the checksum
 routine.  If the ISBN passed to the constructor was invalid,
 the error might have been in any of the other nine positions.
 
+=head2  $obj->as_ean()
+
+Converts the ISBN to the equivalent EAN (European Article Number).
+No pricing extension is added.  Returns the EAN as a string.  This
+method can also be used as an exportable function since it checks
+its argument list to determine what to do.
+
+=head1 EXPORTABLE FUNCTIONS
+
+Some functions can be used without the object interface.  These
+do not use object technology behind the scenes.
+
+=head2 is_valid_checksum('1565921496')
+
+Takes the ISBN string and runs it through the checksum
+comparison routine.  Returns 1 if the ISBN is valid, 0 otherwise.
+
+=head2 isbn_to_ean('1565921496')
+
+Takes the ISBN string and converts it to the equivalent
+EAN string.  This function checks for a valid ISBN and will return
+undef for invalid ISBNs, otherwise it returns the EAN as a string.
+Uses as_ean internally, which checks its arguments to determine
+what to do.
+
+=head2 ean_to_isbn('9781565921498')
+
+Takes the EAN string and converts it to the equivalent
+ISBN string.  This function checks for a valid ISBN and will return
+undef for invalid ISBNs, otherwise it returns the EAN as a string.
+Uses as_ean internally, which checks its arguments to determine
+what to do.
+
 =head1 AUTHOR
 
 brian d foy <comdog@computerdog.com>
-
 please see <URL:http://computerdog.com/brian/style.html> for 
 guidelines on proper attribution.
 
+Copyright 1998, Smith Renaud, Inc. 
+
 The coding of this module was supported by Smith Renaud, Inc. 
-<URL:http://www.smithrenaud.com> and released under the terms of 
-the Perl Artistic License.
+<URL:http://www.smithrenaud.com>.  This module is released under 
+the terms of the Perl Artistic License.
 
 Country code and publisher code graciously provided by Steve
 Fisher <stevef@teleord.co.uk> of Whitaker (the UK ISBN folks
@@ -479,4 +585,6 @@ and the major bibliographic data provider in the UK).
 Thanks to Julie Koo of Kaya Publishing <URL:http://www.kaya.com>
 for useful discussions.
 
+Thanks to Mark W. Eichin <eichin@thok.org> for suggestions and
+discussions on EAN support.
 =cut
