@@ -1,5 +1,10 @@
 Revision history for Perl extension Business::ISBN.
 
+1.51      Wed Jan 24 14:22:02 EST 2001
+	- version 1.5 fixed some bugs with checksums
+	- version 1.51 has a few minor doc fixes
+	- now we have sane version numbers. :)
+
 20001010  Sat Sep  9 00:33:07 EDT 2000
 	- fixed some missing arguments to _is_valid.  
 	- updated contact information

@@ -11,7 +11,7 @@ my $debug = 0;
 @EXPORT    = qw();
 @EXPORT_OK = qw(is_valid_checksum ean_to_isbn isbn_to_ean);
 
-$VERSION   = '1.5';
+$VERSION   = '1.51';
 
 sub new
 	{
@@ -576,13 +576,9 @@ what to do.
 
 =head1 AUTHOR
 
-brian d foy <brian@smithrenaud.com>
+brian d foy <comdog@panix.com>
 
-Copyright 2000, Smith Renaud, Inc. 
-
-The coding of this module was supported by Smith Renaud, Inc. 
-<URL:http://www.smithrenaud.com>.  This module is released under 
-the terms of the Perl Artistic License.
+Copyright 2001 brian d foy
 
 Country code and publisher code graciously provided by Steve
 Fisher <stevef@teleord.co.uk> of Whitaker (the UK ISBN folks
