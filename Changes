@@ -1,0 +1,5 @@
+Revision history for Perl extension Business::ISBN.
+
+19980329  Sun Mar 29 03:29:16 1998
+	- original version; created by h2xs 1.18
+	- gutsy enough to actually release it for testing and comments

@@ -1,0 +1,141 @@
+NAME
+
+Business::ISBN - work with International Standard Book Numbers
+
+SYNOPSIS
+
+	use Business::ISBN;
+	
+	$isbn_object = new Business::ISBN('1565922573');
+	$isbn_object = new Business::ISBN('1-56592-257-3');
+	
+	#print the ISBN with hyphens at positions specified #by
+	constructor print $isbn_object->as_string;
+	
+	#print the ISBN with hyphens at specified positions. #this
+	not does affect the default positions print
+	$isbn_object->as_string([]);
+	
+	#print the country code, country, or publisher code print
+	$isbn->country_code; print $isbn->country; print
+	$isbn->publisher_code;
+	
+	#check to see if the ISBN is valid $isbn_object->is_valid;
+	
+	#fix the ISBN checksum.  BEWARE:  the error might not be #in
+	the checksum! $isbn_object->fix_checksum;
+
+DESCRIPTION
+
+new($isbn)
+
+The constructor accepts a scalar representing the ISBN.
+
+The string representing the ISBN may contain characters
+other than [0-9xX], although these will be removed in the
+internal representation.  The resulting string must look
+like an ISBN - the first nine characters must be digits and
+the tenth character must be a digit, 'x', or 'X'.
+
+The constructor attempts to determine the country code and
+the publisher code based on data from .  If these data
+cannot be determined, the constructor returns an error
+number:
+
+	-3 Could not determine publisher code 
+	-2 Could not determinecountry code 
+	-1 ISBN is not valid
+
+The string passed as the ISBN need not be a valid ISBN as
+long as it superficially looks like one.  This allows one to
+use the fix_checksum() method.  Despite the disclaimer in
+the discussion of that method, the author has found it
+extremely useful.  One should check the validity of the ISBN
+with is_valid() rather than relying on the return value of
+the constructor.
+
+If the constructor decides it can't create an object, it
+returns undef.  It may do this if the string passed as the
+ISBN can't be munged to the internal format.
+
+$obj->publisher_code
+
+Returns the publisher code.
+
+$obj->country_code
+
+Returns the country code.
+
+$obj->country
+
+Returns the country designation associated with the country
+code.
+
+$obj->hyphen_positions
+
+Returns the list of hyphen positions as determined from the
+country and publisher codes.  the as_string method provides
+a way to temporarily override these positions and to even
+forego them altogether.
+
+$obj->as_string(),  $obj->as_string([])
+
+Return the ISBN as a string.  This function takes an
+optional anonymous array (or array reference) that specifies
+the placement of hyphens in the string.  An empty list
+produces a string with no hyphens.
+
+The positions specified in the passed anonymous array are
+only used for one method use and do not replace the values
+specified by the constructor.
+
+Positions less than 1 and greater than 9 are silently
+ignored.
+
+A terminating 'x' is changed to 'X'.
+
+$obj->is_valid()
+
+Returns 1 if the checksum is valid and the country and
+publisher codes are defined.
+
+Returns -1 if the ISBN does not pass the checksum test, and
+1 if it does.  The constructor accepts invalid ISBN's so
+that they might be fixed with fix_checksum.
+
+Returns -2 if a country code could not be determined (relies
+on a valid checksum).
+
+Returns -3 if a publisher code could not be determined
+(relies on a valid checksum and country code).
+
+$obj->fix_checksum()
+
+Replace the tenth character with the checksum the
+corresponds to the previous nine digits.  This does not
+guarantee that the ISBN corresponds to the product one
+thinks it does, or that the ISBN corresponds to any product
+at all.  It only produces a string that passes the checksum
+routine.  If the ISBN passed to the constructor was invalid,
+the error might have been in any of the other nine
+positions.
+
+AUTHOR
+
+brian d foy <comdog@computerdog.com>
+
+please see <URL:http://computerdog.com/brian/style.html> for
+guidelines on proper attribution.
+
+The coding of this module was supported by Smith Renaud,
+Inc. <URL:http://www.smithrenaud.com> and released under the
+terms of the Perl Artistic License.
+
+Country code and publisher code graciously provided by Steve
+Fisher <stevef@teleord.co.uk> of Whitaker (the UK ISBN folks
+and the major bibliographic data provider in the UK).
+"Whitaker - helping to link authors to readers worldwide"
+
+Thanks to Julie Koo of Kaya Publishing
+<URL:http://www.kaya.com> for useful discussions.
+
