@@ -1,6 +1,6 @@
 package Business::ISBN;
-# $Revision: 1.56 $
-# $Id: ISBN.pm,v 1.56 2001/03/10 19:29:03 brian Exp $
+# $Revision: 1.57 $
+# $Id: ISBN.pm,v 1.57 2001/03/19 14:32:29 brian Exp $
 
 use strict;
 use subs qw( _common_format _checksum is_valid_checksum
@@ -22,7 +22,7 @@ my $debug = 0;
 	INVALID_COUNTRY_CODE INVALID_PUBLISHER_CODE
 	BAD_CHECKSUM GOOD_ISBN BAD_ISBN);
 
-($VERSION)   = q$Revision: 1.56 $ =~ m/(\d+\.\d+)\s*$/;
+($VERSION)   = q$Revision: 1.57 $ =~ m/(\d+\.\d+)\s*$/;
 
 sub INVALID_COUNTRY_CODE   { -2 };
 sub INVALID_PUBLISHER_CODE { -3 };
@@ -234,7 +234,7 @@ sub is_valid_checksum
 	{
 	my $data = _common_format shift;
 	
-	return BAD_ISBN unless length $data == 10;
+	return BAD_ISBN unless ( $data and length $data == 10 );
 	return GOOD_ISBN if substr($data, 9, 1) eq _checksum $data;
 	
 	return BAD_CHECKSUM;
@@ -502,7 +502,8 @@ the tenth character must be a digit, 'x', or 'X'.
 
 The constructor attempts to determine the country
 code and the publisher code.  If these data cannot
-be determined, the constructor sets C<$obj->is_valid>.
+be determined, the constructor sets C<$obj->is_valid>
+to something other than GOOD_ISBN.
 An object is still returned and it is up to the program
 to check C<$obj->is_valid> for one of four values (which
 may be exported on demand). The actual values of these
@@ -528,8 +529,9 @@ interface and use the c<is_valid_checksum()> function
 which is exportable on demand.
 
 If the constructor decides it can't create an object, it
-returns undef.  It may do this if the string passed as the
-ISBN can't be munged to the internal format.
+returns C<undef>.  It may do this if the string passed as the
+ISBN can't be munged to the internal format meaning that it
+does not even come close to looking like an ISBN.
 
 =head2 $obj->publisher_code
 

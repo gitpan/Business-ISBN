@@ -1,5 +1,5 @@
-# $Revision: 1.5 $
-# $Id: test.pl,v 1.5 2001/03/12 18:31:35 brian Exp $
+# $Revision: 1.6 $
+# $Id: test.pl,v 1.6 2001/03/19 14:33:57 brian Exp $
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
@@ -8,7 +8,7 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $test = 1; $| = 1; print "1..14\n"; }
+BEGIN { $^W = 1; $test = 1; $| = 1; print "1..17\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Business::ISBN;
 $loaded = 1;
@@ -29,6 +29,9 @@ my $PUBLISHER          = "56592";
 my $BAD_CHECKSUM_ISBN  = "1565922572";
 my $BAD_COUNTRY_ISBN   = "9990122572";
 my $BAD_PUBLISHER_ISBN = "1456922572";
+my $NULL_ISBN          = undef;
+my $NO_GOOD_CHAR_ISBN  = "abcdefghij";
+my $SHORT_ISBN         = "156592";
 
 # test to see if we can construct an object?
 {
@@ -118,4 +121,22 @@ $valid = Business::ISBN::is_valid_checksum( $BAD_CHECKSUM_ISBN );
 
 print "not " unless $valid eq Business::ISBN::BAD_CHECKSUM;
 print "ok ", $test++, "\n";
+
+# the following three tests check is_valid_checksum's behaviour
+# with bad data.
+$valid = Business::ISBN::is_valid_checksum( $NULL_ISBN );
+
+print "not " unless $valid eq Business::ISBN::BAD_ISBN;
+print "ok ", $test++, "\n";
+
+$valid = Business::ISBN::is_valid_checksum( $NO_GOOD_CHAR_ISBN );
+
+print "not " unless $valid eq Business::ISBN::BAD_ISBN;
+print "ok ", $test++, "\n";
+
+$valid = Business::ISBN::is_valid_checksum( $SHORT_ISBN );
+ 
+print "not " unless $valid eq Business::ISBN::BAD_ISBN;
+print "ok ", $test++, "\n";
+
 }
