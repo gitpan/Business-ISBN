@@ -1,4 +1,4 @@
-# $Id: xisbn.t,v 1.4 2004/09/02 21:16:51 comdog Exp $
+# $Id: xisbn10.t,v 2.1 2007/01/30 04:14:04 comdog Exp $
 
 use Test::More;
 
@@ -45,7 +45,7 @@ foreach my $string ( @isbns )
 	{
 	local $^W=0;
 	my $isbn = Business::ISBN->new( $string );
-	isa_ok( $isbn, 'Business::ISBN' );
+	isa_ok( $isbn, 'Business::ISBN10' );
 	ok( $isbn->is_valid, "$isbn is valid" );
 	
 	is( $isbn->_xisbn_url, 

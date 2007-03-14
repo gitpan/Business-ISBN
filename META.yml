@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Business-ISBN
-version:             1.84
+version:             2.00_01
 abstract:            ~
 license:             perl
 generated_by:        ExtUtils::MakeMaker version 6.31
@@ -11,3 +11,5 @@ requires:
 meta-spec:
     url:     http://module-build.sourceforge.net/META-spec-v1.2.html
     version: 1.2
+author:
+    - brian d foy <bdfoy@cpan.org>
