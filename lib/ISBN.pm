@@ -1,5 +1,5 @@
-# $Revision: 2.12 $
-# $Id: ISBN.pm,v 2.12 2007/09/12 18:26:06 comdog Exp $
+# $Revision: 2.14 $
+# $Id: ISBN.pm,v 2.14 2007/10/02 08:13:37 comdog Exp $
 package Business::ISBN;
 use strict;
 
@@ -108,7 +108,7 @@ BEGIN {
 		);
 	};
 	
-$VERSION = "2.02_05";
+$VERSION = "2.03";
 
 sub INVALID_PREFIX         () { -4 };
 sub INVALID_GROUP_CODE     () { -2 };
