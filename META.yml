@@ -1,9 +1,9 @@
 --- #YAML:1.0
 name:                Business-ISBN
-version:             2.03
+version:             2.03_01
 abstract:            Parse and validate ISBNs
 license:             perl
-generated_by:        ExtUtils::MakeMaker version 6.32
+generated_by:        ExtUtils::MakeMaker version 6.36
 distribution_type:   module
 requires:     
     Business::ISBN::Data:          1.15
