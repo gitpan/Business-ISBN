@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Business-ISBN
-version:             2.04
+version:             2.04_01
 abstract:            Parse and validate ISBNs
 license:             perl
 author:              
@@ -9,7 +9,6 @@ generated_by:        ExtUtils::MakeMaker version 6.44
 distribution_type:   module
 requires:     
     Business::ISBN::Data:          20081020
-    GD::Barcode::EAN13:            0
     Test::More:                    0
 meta-spec:
     url:     http://module-build.sourceforge.net/META-spec-v1.3.html
