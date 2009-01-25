@@ -1,15 +1,22 @@
 --- #YAML:1.0
-name:                Business-ISBN
-version:             2.04_01
-abstract:            Parse and validate ISBNs
-license:             perl
-author:              
+name:               Business-ISBN
+version:            2.05
+abstract:           Parse and validate ISBNs
+author:
     - brian d foy <bdfoy@cpan.org>
-generated_by:        ExtUtils::MakeMaker version 6.44
-distribution_type:   module
-requires:     
-    Business::ISBN::Data:          20081020
-    Test::More:                    0
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    Business::ISBN::Data:  20081208
+    Test::More:           0
+    URI:                  0
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.48
 meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
-    version: 1.3
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4
