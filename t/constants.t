@@ -1,12 +1,10 @@
-# $Id: constants.t,v 1.1 2007/03/11 20:18:05 comdog Exp $
-
 use Test::More 'no_plan';
 
 require_ok( 'Business::ISBN' );
 
 can_ok( 'Business::ISBN', 'import' );
 
-ok( defined %Business::ISBN::EXPORT_TAGS );
+ok( %Business::ISBN::EXPORT_TAGS );
 ok( exists $Business::ISBN::EXPORT_TAGS{'all'} );
 
 isa_ok( $Business::ISBN::EXPORT_TAGS{'all'}, ref [] );

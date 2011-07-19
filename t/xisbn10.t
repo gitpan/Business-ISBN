@@ -1,5 +1,3 @@
-# $Id: xisbn10.t,v 2.1 2007/01/30 04:14:04 comdog Exp $
-
 use Test::More;
 
 BEGIN {
@@ -49,7 +47,7 @@ foreach my $string ( @isbns )
 	ok( $isbn->is_valid, "$isbn is valid" );
 	
 	is( $isbn->_xisbn_url, 
-		"http://labs.oclc.org/xisbn/$string", 
+		"http://xisbn.worldcat.org/xid/isbn/$string",
 		"URL is correct for $string" );
 	
 	my $expected = $hash->{$isbn};
