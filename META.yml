@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Business-ISBN
-version:            2.05_01
+version:            2.05_03
 abstract:           Parse and validate ISBNs
 author:
     - brian d foy <bdfoy@cpan.org>
@@ -18,7 +18,7 @@ no_index:
     directory:
         - t
         - inc
-generated_by:       ExtUtils::MakeMaker version 6.57_05
+generated_by:       ExtUtils::MakeMaker version 6.55_02
 meta-spec:
     url:      http://module-build.sourceforge.net/META-spec-v1.4.html
     version:  1.4

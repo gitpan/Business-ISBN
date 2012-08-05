@@ -24,7 +24,7 @@ use Carp qw(carp croak cluck);
 
 my $debug = 0;
 
-$VERSION   = '2.05_01';
+$VERSION   = '2.05_03';
 
 sub _max_length { 10 }
 
@@ -118,7 +118,7 @@ brian d foy C<< <bdfoy@cpan.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2001-2009, brian d foy, All Rights Reserved.
+Copyright (c) 2001-2011, brian d foy, All Rights Reserved.
 
 You may redistribute this under the same terms as Perl itself.
 
