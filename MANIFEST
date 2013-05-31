@@ -10,11 +10,13 @@ lib/Business/ISBN13.pm
 LICENSE
 Makefile.PL
 MANIFEST
+MYMETA.json
 MYMETA.yml
 README
 scripts/get_isbn_data.pl
 t/albania.t
 t/constants.t
+t/github/3.t
 t/interface.t
 t/isbn10.t
 t/isbn13.t
@@ -29,4 +31,5 @@ t/rt/29292.t
 t/test_manifest
 t/valid_isbn_checksum.t
 t/xisbn10.t
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)
