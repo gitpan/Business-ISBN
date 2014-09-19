@@ -65,6 +65,7 @@ use subs qw(
 	BAD_CHECKSUM
 	GOOD_ISBN
 	BAD_ISBN
+	ARTICLE_CODE_OUT_OF_RANGE
 	);
 use vars qw( $VERSION @ISA @EXPORT_OK %EXPORT_TAGS $debug %group_data
 	$MAX_GROUP_CODE_LENGTH %ERROR_TEXT );
@@ -72,7 +73,7 @@ use vars qw( $VERSION @ISA @EXPORT_OK %EXPORT_TAGS $debug %group_data
 use Carp qw(carp croak cluck);
 use base qw(Exporter);
 
-use Business::ISBN::Data 20120719.001; # now a separate module
+use Business::ISBN::Data 20140910.001; # now a separate module
 # ugh, hack
 *group_data = *Business::ISBN::country_data;
 sub _group_data { $group_data{ $_[1] } }
@@ -98,7 +99,7 @@ my $debug = 0;
 BEGIN {
 	@EXPORT_OK = qw(
 		INVALID_GROUP_CODE INVALID_PUBLISHER_CODE
-		BAD_CHECKSUM GOOD_ISBN BAD_ISBN
+		BAD_CHECKSUM GOOD_ISBN BAD_ISBN ARTICLE_CODE_OUT_OF_RANGE
 		INVALID_PREFIX
 		%ERROR_TEXT
 		valid_isbn_checksum
@@ -109,15 +110,15 @@ BEGIN {
 		);
 	};
 
-$VERSION = "2.07";
+$VERSION = "2.08";
 
-sub INVALID_PREFIX         () { -4 };
-sub INVALID_GROUP_CODE     () { -2 };
-sub INVALID_PUBLISHER_CODE () { -3 };
-sub BAD_CHECKSUM           () { -1 };
-sub GOOD_ISBN              () {  1 };
-sub BAD_ISBN               () {  0 };
-
+sub ARTICLE_CODE_OUT_OF_RANGE () { -5 }
+sub INVALID_PREFIX            () { -4 };
+sub INVALID_GROUP_CODE        () { -2 };
+sub INVALID_PUBLISHER_CODE    () { -3 };
+sub BAD_CHECKSUM              () { -1 };
+sub GOOD_ISBN                 () {  1 };
+sub BAD_ISBN                  () {  0 };
 
 %ERROR_TEXT = (
 	 0 => "Bad ISBN",
@@ -126,6 +127,7 @@ sub BAD_ISBN               () {  0 };
 	-2 => "Invalid group code",
 	-3 => "Invalid publisher code",
 	-4 => "Invalid prefix (must be 978 or 979)",
+	-5 => "Incremented article code would be out of range",
 	);
 
 use Business::ISBN10;
@@ -373,6 +375,30 @@ uniquely identifies the item.
 
 sub article_code { $_[0]->{'article_code'} }
 
+=item article_code_length
+
+Returns the article code length for the ISBN.
+
+=cut
+
+sub article_code_length { length $_[0]->{'article_code'} }
+
+=item article_code_min
+
+Returns the minimum article code length for the publisher code.
+
+=cut
+
+sub article_code_min { 0 }
+
+=item article_code_max
+
+Returns the max article code length for the publisher code.
+
+=cut
+
+sub article_code_max { '9' x $_[0]->article_code_length }
+
 =item checksum
 
 Returns the checksum code for the ISBN. This checksum may not be valid since
@@ -428,7 +454,7 @@ sub fix_checksum {
 	}
 
 
-=item as_string(),  as_string([])
+=item as_string(), as_string([])
 
 Return the ISBN as a string.  This function takes an
 optional anonymous array (or array reference) that specifies
@@ -536,6 +562,72 @@ sub _xisbn_url {
 	my $isbn = $self->as_string([]);
 
 	return "http://xisbn.worldcat.org/xid/isbn/$isbn";
+	}
+
+=item increment
+
+Returns the next C<Business::ISBN> by incrementing the article code of
+the specified ISBN (object or scalar).
+
+Returns undef, if the parameter is invalid or equals the maximum
+possible ISBN for the publisher.
+
+	$isbn = Business::ISBN->new('1565922573');  # 1-56592-257-3
+	$next_isbn = $isbn->increment;              # 1-56592-258-1
+
+If the next article code would exceed the maximum possible article
+code (such as incrementing 999 to 1000), this returns ARTICLE_CODE_OUT_OF_RANGE
+as the error.
+
+=cut
+
+sub increment { $_[0]->_step_article_code( +1 ) }
+
+=item decrement
+
+Returns the previous C<Business::ISBN> by decrementing the article
+code of the specified ISBN (object or scalar).
+
+Returns undef, if the parameter is invalid or equals the minimum
+possible ISBN for the publisher.
+
+	$isbn = Business::ISBN->new('1565922573');  # 1-56592-257-3
+	$prev_isbn = $isbn->decrement;              # 1-56592-256-5
+
+If the next article code would exceed the maximum possible article
+code (such as incrementing 000 to -1), this returns ARTICLE_CODE_OUT_OF_RANGE
+as the error.
+
+=cut
+
+sub decrement { $_[0]->_step_article_code( -1 ) }
+
+sub _step_article_code {
+	my( $self, $step ) = @_;
+	carp "The step for _step_isbn must be an integer"
+		unless( $step == int $step and $step != 0 );
+
+	my $next_article_code = int $self->article_code + $step;
+
+	return ARTICLE_CODE_OUT_OF_RANGE unless
+		$next_article_code >= $self->article_code_min
+			&&
+		$next_article_code <= $self->article_code_max
+		;
+
+	my $next_isbn = Business::ISBN->new(
+		join('', 
+			$self->prefix, 
+			$self->group_code, 
+			$self->publisher_code, 
+			sprintf( "%0*d", $self->article_code_length, $next_article_code ), 
+			'0'
+			)
+		);
+
+	$next_isbn->fix_checksum;
+
+	$next_isbn;
 	}
 
 =item png_barcode
