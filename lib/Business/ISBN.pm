@@ -110,7 +110,7 @@ BEGIN {
 		);
 	};
 
-$VERSION = "2.08";
+$VERSION = "2.09";
 
 sub ARTICLE_CODE_OUT_OF_RANGE () { -5 }
 sub INVALID_PREFIX            () { -4 };
@@ -899,5 +899,7 @@ and testing.
 
 Ed Summers C<< <esummers@cpan.org> >> has volunteered to help with
 this module.
+
+Markus Spann C<< <markus_spann@gmx.de> >> added C<increment> and C<decrement>.
 
 =cut

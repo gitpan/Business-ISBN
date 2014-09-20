@@ -38,7 +38,6 @@
       },
       "test" : {
          "requires" : {
-            "Test::ISBN" : "2.0",
             "Test::More" : "0.95"
          }
       }
@@ -51,5 +50,5 @@
          "web" : "https://github.com/briandfoy/business--isbn"
       }
    },
-   "version" : "2.08"
+   "version" : "2.09"
 }

@@ -4,7 +4,6 @@ author:
   - 'brian d foy <bdfoy@cpan.org>'
 build_requires:
   ExtUtils::MakeMaker: 0
-  Test::ISBN: 2.0
   Test::More: 0.95
 configure_requires:
   ExtUtils::MakeMaker: 0
@@ -24,4 +23,4 @@ requires:
   URI: 0
 resources:
   repository: https://github.com/briandfoy/business--isbn.git
-version: 2.08
+version: 2.09
